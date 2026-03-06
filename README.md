@@ -151,7 +151,7 @@ Component Link
 ---
 
 Live Application [-]
-CRM Data [-]
+CRM Data [https://docs.google.com/spreadsheets/d/1ZTFNug87U_v3bem7noO_GXXC-go98gk5jcP0QhwAF2k/edit?usp=sharing]
 API Endpoint [-]
 
 ---
@@ -202,7 +202,7 @@ Advantages:
 ## 1️⃣ Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/global-lead-gen-engine.git
+git clone https://github.com/joelcasado-tech/global-lead-gen-engine.git
 ```
 
 ---
