@@ -142,11 +142,15 @@ Full **English / Spanish UI toggle** for international teams.
 
 ---
 
-# 📊 Live Demo
+## 🚀 Live Demo & CRM
 
-- Live Application: Not deployed
-- CRM Data: [View CRM Spreadsheet](https://docs.google.com/spreadsheets/d/1ZTFNug87U_v3bem7noO_GXXC-go98gk5jcP0QhwAF2k/edit?usp=sharing)
-- API Endpoint: Not configured
+| Component            | Access Link                                                                                                                        |
+| :------------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
+| **Live Application** | [🔗 View Project on Vercel](https://global-lead-gen-engine.vercel.app/)                                                            |
+| **Real-Time CRM**    | [📊 View Leads Google Sheet](https://docs.google.com/spreadsheets/d/1ZTFNug87U_v3bem7noO_GXXC-go98gk5jcP0QhwAF2k/edit?usp=sharing) |
+| **Backend API**      | `https://global-lead-gen-engine.onrender.com/`                                                                                     |
+
+> **Infrastructure Note:** To minimize operational overhead (Opex), the backend is deployed on a serverless-style spin-up instance. Please allow ~30 seconds for the first AI analysis to process if the engine has been idle.
 
 ---
 
