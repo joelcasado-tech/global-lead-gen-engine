@@ -52,6 +52,29 @@ function App() {
     }
   };
 
+  const handleSync = async () => {
+    if (!result) return;
+    setLoading(true);
+
+    const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycby5nOKAlbibLqBMnPYnFtdoa22E3_aUJ_RFTPfxdW5mGlLj1XVzHoUIx_dWMIq4W-uz/exec';
+
+    try {
+      await axios.post(WEBHOOK_URL, {
+        ...result,
+        original_message: input
+      }, {
+        headers: { 'Content-Type': 'text/plain' }
+      });
+      
+      alert(lang === 'en' ? "Synced to CRM" : "Sincronizado al CRM");
+    } catch (err) {
+      console.error(err);
+      alert("Sync failed. Check console.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#f8fafc] p-6 md:p-12 font-sans text-slate-900">
       {/* Header */}
@@ -141,8 +164,12 @@ function App() {
                     {result.draft_response}
                   </p>
                 </section>
-
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-200">
+                
+                <button 
+                  onClick={handleSync}
+                  disabled={loading}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-200 disabled:opacity-50"
+                >
                   <CheckCircle size={20} /> {t.syncButton}
                 </button>
               </div>
@@ -157,6 +184,7 @@ function App() {
       </main>
     </div>
   );
+  
 }
 
 export default App;
