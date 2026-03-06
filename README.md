@@ -128,19 +128,17 @@ Full **English / Spanish UI toggle** for international teams.
 
 ---
 
-# 🛠 Tech Stack
+## 🛠 Tech Stack
 
-Layer Technology Purpose
-
----
-
-Frontend React Responsive SaaS dashboard
-Styling TailwindCSS v4 Fast UI development
-Backend Node.js + Express Middleware + API security
-AI Engine Mistral AI Intent analysis & reasoning
-Validation Zod Guaranteed JSON structure
-Integration Google Apps Script Serverless CRM bridge
-Database Google Sheets Lightweight CRM system
+| Layer       | Technology         | Purpose                     |
+| ----------- | ------------------ | --------------------------- |
+| Frontend    | React              | Responsive SaaS dashboard   |
+| Styling     | Tailwind CSS v4    | Fast UI development         |
+| Backend     | Node.js + Express  | Middleware & API security   |
+| AI Engine   | Mistral AI         | Intent analysis & reasoning |
+| Validation  | Zod                | Guaranteed JSON structure   |
+| Integration | Google Apps Script | Serverless CRM bridge       |
+| Database    | Google Sheets      | Lightweight CRM storage     |
 
 ---
 
