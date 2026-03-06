@@ -28,11 +28,12 @@ app.post('/api/triage', async (req, res) => {
       schema: z.object({
         language: z.string(),
         intent: z.enum(['Hot', 'Warm', 'Cold']),
+        confidence_score: z.number().min(0).max(100),
         summary: z.string(),
         draft_response: z.string(),
       }),
       prompt: `Analyze this business inquiry: "${leadMessage}". 
-               Categorize intent, summarize in 1 sentence, and draft a 3-sentence professional reply in the same language.`,
+               Categorize intent, include a confidence_score (0-100) for the intent classification as an integer, summarize in 1 sentence, and draft a 3-sentence professional reply in the same language.`,
     });
 
     res.json(result.object);

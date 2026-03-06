@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Toaster, toast } from 'sonner';
-import { Zap, Globe, MessageSquare, CheckCircle, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Zap, Globe, MessageSquare, CheckCircle, ShieldCheck, AlertCircle, Copy } from 'lucide-react';
 
 const translations = {
   en: {
@@ -30,6 +30,9 @@ const translations = {
   }
 };
 
+// Allow overriding backend URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 function App() {
   const [lang, setLang] = useState('en');
   const [input, setInput] = useState('');
@@ -44,7 +47,7 @@ function App() {
     if (!input.trim()) return;
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/triage', {
+      const response = await axios.post(`${API_URL}/api/triage`, {
         leadMessage: input
       });
       setResult(response.data);
@@ -69,7 +72,7 @@ function App() {
     setLoading(true);
 
     try {
-      const resp = await axios.post('http://localhost:5000/api/sync', {
+      const resp = await axios.post(`${API_URL}/api/sync`, {
         ...result,
         draft_response: editedResponse, // Send the human edited version
         original_message: input
@@ -94,6 +97,16 @@ function App() {
     }
   };
 
+  // Add this helper function
+  const copyToClipboard = () => {
+    try {
+      navigator.clipboard.writeText(editedResponse || '');
+      toast.success(lang === 'en' ? "Copied to clipboard!" : "¡Copiado al portapapeles!");
+    } catch {
+      toast.error(lang === 'en' ? 'Copy failed' : 'Error al copiar');
+    }
+  };
+
   // Load stats from localStorage on mount
   useEffect(() => {
     try {
@@ -105,7 +118,7 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-6 md:p-12 font-sans text-slate-900">
+    <div className="antialiased min-h-screen bg-[#f8fafc] p-6 md:p-12 font-sans text-slate-900">
       <Toaster position="top-right" richColors />
       {/* Header */}
       <header className="max-w-5xl mx-auto mb-10 flex justify-between items-start">
@@ -190,7 +203,7 @@ function App() {
                    <div className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-black ${
                     result.intent === 'Hot' ? 'bg-red-500' : 'bg-orange-500'
                    }`}>
-                     {result.intent.toUpperCase()} PRIORITY
+                    {result.intent.toUpperCase()} ({result.confidence_score ?? 0}% confidence)
                    </div>
                 </div>
                 <AlertCircle size={18} className="text-slate-500" />
@@ -205,7 +218,15 @@ function App() {
                 </section>
 
                 <section className="p-5 bg-blue-50/50 border border-blue-100 rounded-xl">
-                  <h3 className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-3">{t.draftLabel}</h3>
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em]">{t.draftLabel}</h3>
+                    <button 
+                      onClick={copyToClipboard}
+                      className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                    >
+                      <Copy size={12} /> {lang === 'en' ? "COPY" : "COPIAR"}
+                    </button>
+                  </div>
                   <textarea
                     className="w-full p-4 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-blue-400 resize-vertical text-slate-700 leading-relaxed text-sm"
                     value={editedResponse}
