@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Toaster, toast } from 'sonner';
 import { Zap, Globe, MessageSquare, CheckCircle, ShieldCheck, AlertCircle } from 'lucide-react';
 
 const translations = {
@@ -57,7 +58,7 @@ function App() {
       setStats(newStats);
       try { localStorage.setItem('gle_stats', JSON.stringify(newStats)); } catch { /* ignore */ }
     } catch {
-      alert("Backend connection failed.");
+      toast.error(lang === 'en' ? 'Connection failed' : 'Conexión fallida');
     } finally {
       setLoading(false);
     }
@@ -76,7 +77,7 @@ function App() {
       // If the relay returned an error-like response, surface it
       if (resp && resp.data && resp.data.error) {
         console.error('Sync relay error', resp.data);
-        alert('Sync failed: ' + (resp.data.error || JSON.stringify(resp.data)));
+        toast.error('Sync failed: ' + (resp.data.error || JSON.stringify(resp.data)));
         setLoading(false);
         return;
       }
@@ -84,10 +85,10 @@ function App() {
       const newStats = { ...stats, syncs: (stats.syncs || 0) + 1 };
       setStats(newStats);
       try { localStorage.setItem('gle_stats', JSON.stringify(newStats)); } catch { /* ignore */ }
-      alert(lang === 'en' ? "Synced to CRM" : "Sincronizado al CRM");
+      toast.success(lang === 'en' ? 'Synced to CRM' : 'Sincronizado al CRM');
     } catch (err) {
       console.error(err);
-      alert("Sync failed. Check console.");
+      toast.error(lang === 'en' ? 'Sync failed. Check console.' : 'Error al sincronizar. Revisa la consola.');
     } finally {
       setLoading(false);
     }
@@ -105,6 +106,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] p-6 md:p-12 font-sans text-slate-900">
+      <Toaster position="top-right" richColors />
       {/* Header */}
       <header className="max-w-5xl mx-auto mb-10 flex justify-between items-start">
         <div>

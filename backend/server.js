@@ -1,4 +1,5 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 import 'dotenv/config';
 import { generateObject } from 'ai';
@@ -8,6 +9,15 @@ import { z } from 'zod';
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Rate limiter for API endpoints
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Limiting each IP to 20 requests per window
+  message: { error: "Too many leads processed. Take a coffee break!" }
+});
+
+app.use('/api/', limiter);
 
 app.post('/api/triage', async (req, res) => {
   const { leadMessage } = req.body;
@@ -29,6 +39,26 @@ app.post('/api/triage', async (req, res) => {
   } catch (error) {
     console.error("AI Triage Error:", error);
     res.status(500).json({ error: "Failed to process lead." });
+  }
+});
+
+app.post('/api/sync', async (req, res) => {
+  const webhook = process.env.CRM_WEBHOOK || 'https://script.google.com/macros/s/AKfycby5nOKAlbibLqBMnPYnFtdoa22E3_aUJ_RFTPfxdW5mGlLj1XVzHoUIx_dWMIq4W-uz/exec';
+  try {
+    const resp = await fetch(webhook, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body),
+    });
+    const text = await resp.text();
+    if (!resp.ok) {
+      console.error('CRM webhook responded with error', resp.status, text);
+      return res.status(502).json({ error: 'CRM webhook error', status: resp.status, body: text });
+    }
+    return res.json({ ok: true, status: resp.status, body: text });
+  } catch (err) {
+    console.error('Error relaying to CRM webhook:', err);
+    return res.status(500).json({ error: 'Failed to reach CRM webhook', message: err.message });
   }
 });
 
