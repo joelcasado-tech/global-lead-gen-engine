@@ -2,10 +2,6 @@
 
 ### Bilingual AI Middleware for Automated Lead Triage
 
-```{=html}
-<p align="center">
-```
-
 ![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-Frontend-61DAFB?logo=react&logoColor=black)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-38B2AC?logo=tailwindcss&logoColor=white)
@@ -13,10 +9,6 @@
 ![License](https://img.shields.io/badge/License-MIT-blue)
 ![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen)
 ![PRs](https://img.shields.io/badge/PRs-Welcome-purple)
-
-```{=html}
-</p>
-```
 
 ---
 
@@ -102,7 +94,7 @@ graph TD
 
 AI never sends messages automatically.
 
-Instead it generates:
+It generates:
 
 - A **3‑sentence professional response**
 - An **editable draft**
