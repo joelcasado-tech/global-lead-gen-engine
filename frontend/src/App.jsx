@@ -207,11 +207,9 @@ function App() {
               className="mt-4 w-full bg-slate-900 hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="animate-spin" size={16} />
-                  {lang === 'en'
-                    ? 'Waking up Engine (this may take a moment)...'
-                    : 'Iniciando motor (esto puede tardar)...'}
+                <span className="flex items-center whitespace-nowrap gap-2">
+                  <Loader2 className="animate-spin mr-2" size={14} />
+                  {lang === 'en' ? 'Loading (this can take a while)' : 'Cargando (esto puede tardar)'}
                 </span>
               ) : (
                 t.buttonProcess
