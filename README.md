@@ -146,13 +146,9 @@ Database Google Sheets Lightweight CRM system
 
 # 📊 Live Demo
 
-Component Link
-
----
-
-Live Application [-]
-CRM Data [https://docs.google.com/spreadsheets/d/1ZTFNug87U_v3bem7noO_GXXC-go98gk5jcP0QhwAF2k/edit?usp=sharing]
-API Endpoint [-]
+- Live Application: Not deployed
+- CRM Data: [View CRM Spreadsheet](https://docs.google.com/spreadsheets/d/1ZTFNug87U_v3bem7noO_GXXC-go98gk5jcP0QhwAF2k/edit?usp=sharing)
+- API Endpoint: Not configured
 
 ---
 
