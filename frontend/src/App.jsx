@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Toaster, toast } from 'sonner';
-import { Zap, Globe, MessageSquare, CheckCircle, ShieldCheck, AlertCircle, Copy } from 'lucide-react';
+import { Zap, Globe, MessageSquare, CheckCircle, ShieldCheck, AlertCircle, Loader2, Copy, ExternalLink } from 'lucide-react';
 
 const translations = {
   en: {
@@ -185,6 +185,7 @@ function App() {
           <p className="text-2xl font-bold text-slate-900">{stats.syncs || 0}</p>
         </div>
       </div>
+      
 
       <main className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         
@@ -205,8 +206,28 @@ function App() {
               disabled={loading}
               className="mt-4 w-full bg-slate-900 hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? t.buttonProcessing : t.buttonProcess}
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="animate-spin" size={16} />
+                  {lang === 'en'
+                    ? 'Waking up Engine (this may take a moment)...'
+                    : 'Iniciando motor (esto puede tardar)...'}
+                </span>
+              ) : (
+                t.buttonProcess
+              )}
             </button>
+            <div className="mt-4">
+              <a
+                href="https://docs.google.com/spreadsheets/d/1ZTFNug87U_v3bem7noO_GXXC-go98gk5jcP0QhwAF2k/edit?usp=sharing"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-blue-600 bg-white border border-slate-100 px-3 py-2 rounded-md shadow-sm hover:bg-slate-50"
+              >
+                <ExternalLink size={14} />
+                {lang === 'en' ? 'View processed leads in CRM' : 'Ver leads procesados en CRM'}
+              </a>
+            </div>
           </div>
         </div>
 
