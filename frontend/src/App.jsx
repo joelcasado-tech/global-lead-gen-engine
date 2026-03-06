@@ -41,6 +41,8 @@ const translations = {
 };
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Ensure no trailing slash so joining paths doesn't produce double-slashes
+const cleanURL = API_URL.replace(/\/$/, '');
 
 function App() {
   const [lang, setLang] = useState('en');
@@ -66,7 +68,7 @@ function App() {
     if (!input.trim()) return;
     setLoading(true);
     try {
-      const response = await axios.post(`${API_URL}/api/triage`, {
+      const response = await axios.post(`${cleanURL}/api/triage`, {
         leadMessage: input
       });
       setResult(response.data);
@@ -89,7 +91,7 @@ function App() {
     setLoading(true);
 
     try {
-      const resp = await axios.post(`${API_URL}/api/sync`, {
+      const resp = await axios.post(`${cleanURL}/api/sync`, {
         ...result,
         draft_response: editedResponse,
         original_message: input

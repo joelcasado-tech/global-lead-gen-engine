@@ -32,6 +32,10 @@ const limiter = rateLimit({
 
 app.use('/api/', limiter);
 
+app.get('/', (req, res) => {
+  res.send('Global Lead-Gen Engine is Live');
+});
+
 app.post('/api/triage', async (req, res) => {
   const { leadMessage } = req.body;
 
