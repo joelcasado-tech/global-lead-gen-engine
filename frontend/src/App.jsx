@@ -41,7 +41,7 @@ const translations = {
 };
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-// Ensure no trailing slash so joining paths doesn't produce double-slashes
+
 const cleanURL = API_URL.replace(/\/$/, '');
 
 function App() {
