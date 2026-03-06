@@ -10,11 +10,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Rate limiter for API endpoints
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // Limiting each IP to 20 requests per window
-  message: { error: "Too many leads processed. Take a coffee break!" }
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { error: 'Too many leads processed. Take a coffee break!' }
 });
 
 app.use('/api/', limiter);
@@ -32,14 +31,13 @@ app.post('/api/triage', async (req, res) => {
         summary: z.string(),
         draft_response: z.string(),
       }),
-      prompt: `Analyze this business inquiry: "${leadMessage}". 
-               Categorize intent, include a confidence_score (0-100) for the intent classification as an integer, summarize in 1 sentence, and draft a 3-sentence professional reply in the same language.`,
+      prompt: `Analyze this business inquiry: "${leadMessage}". Categorize intent, include a confidence_score (0-100) for the intent classification as an integer, summarize in 1 sentence, and draft a 3-sentence professional reply in the same language.`,
     });
 
     res.json(result.object);
   } catch (error) {
-    console.error("AI Triage Error:", error);
-    res.status(500).json({ error: "Failed to process lead." });
+    console.error('AI Triage Error:', error);
+    res.status(500).json({ error: 'Failed to process lead.' });
   }
 });
 

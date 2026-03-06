@@ -15,6 +15,11 @@ const translations = {
     draftLabel: "AI Draft Response",
     syncButton: "Approve & Sync to CRM",
     emptyState: "Awaiting lead input for analysis",
+    stats: {
+      totalTriage: "Total Triage",
+      hotLeads: "Hot Leads",
+      synced: "Synced to CRM",
+    },
   },
   es: {
     title: "Motor Global de Leads",
@@ -27,10 +32,14 @@ const translations = {
     draftLabel: "Borrador de Respuesta IA",
     syncButton: "Aprobar y Sincronizar",
     emptyState: "Esperando entrada de lead para análisis",
+    stats: {
+      totalTriage: "Total de Triajes",
+      hotLeads: "Leads Hot",
+      synced: "Sincronizados al CRM",
+    },
   }
 };
 
-// Allow overriding backend URL
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 function App() {
@@ -43,6 +52,16 @@ function App() {
 
   const t = translations[lang];
 
+  const flagFor = (code) => {
+    switch (code) {
+      case 'es':
+        return '🇪🇸';
+      case 'en':
+      default:
+        return '🇬🇧';
+    }
+  };
+
   const handleTriage = async () => {
     if (!input.trim()) return;
     setLoading(true);
@@ -52,14 +71,12 @@ function App() {
       });
       setResult(response.data);
       setEditedResponse(response.data.draft_response);
-      // Increment triage count and persist
       const newStats = { ...stats, triages: (stats.triages || 0) + 1 };
-      // If the triage marks it as Hot, increment hot counter
       if (response.data && response.data.intent && response.data.intent.toLowerCase() === 'hot') {
         newStats.hotLeads = (newStats.hotLeads || 0) + 1;
       }
       setStats(newStats);
-      try { localStorage.setItem('gle_stats', JSON.stringify(newStats)); } catch { /* ignore */ }
+      try { localStorage.setItem('gle_stats', JSON.stringify(newStats)); } catch { /*ignore*/ }
     } catch {
       toast.error(lang === 'en' ? 'Connection failed' : 'Conexión fallida');
     } finally {
@@ -74,20 +91,18 @@ function App() {
     try {
       const resp = await axios.post(`${API_URL}/api/sync`, {
         ...result,
-        draft_response: editedResponse, // Send the human edited version
+        draft_response: editedResponse,
         original_message: input
       });
-      // If the relay returned an error-like response, surface it
       if (resp && resp.data && resp.data.error) {
         console.error('Sync relay error', resp.data);
         toast.error('Sync failed: ' + (resp.data.error || JSON.stringify(resp.data)));
         setLoading(false);
         return;
       }
-      // Increment sync count and persist
       const newStats = { ...stats, syncs: (stats.syncs || 0) + 1 };
       setStats(newStats);
-      try { localStorage.setItem('gle_stats', JSON.stringify(newStats)); } catch { /* ignore */ }
+      try { localStorage.setItem('gle_stats', JSON.stringify(newStats)); } catch { /*ignore*/ }
       toast.success(lang === 'en' ? 'Synced to CRM' : 'Sincronizado al CRM');
     } catch (err) {
       console.error(err);
@@ -97,7 +112,6 @@ function App() {
     }
   };
 
-  // Add this helper function
   const copyToClipboard = () => {
     try {
       navigator.clipboard.writeText(editedResponse || '');
@@ -106,8 +120,6 @@ function App() {
       toast.error(lang === 'en' ? 'Copy failed' : 'Error al copiar');
     }
   };
-
-  // Load stats from localStorage on mount
   useEffect(() => {
     try {
       const raw = localStorage.getItem('gle_stats');
@@ -135,18 +147,23 @@ function App() {
             <span className="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded border border-slate-200">
               <ShieldCheck size={12} className="text-emerald-500" /> MISTRAL-AI SECURE
             </span>
-            <span className="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded border border-slate-200">
-              <Globe size={12} className="text-blue-500" /> EN/ES ACTIVE
-            </span>
+            <button
+              onClick={() => setLang(lang === 'en' ? 'es' : 'en')}
+              className="flex items-center gap-1 bg-white px-2 py-1 rounded border border-slate-200 text-[11px] font-bold text-slate-600 hover:border-blue-400 hover:text-blue-600"
+            >
+              <span className="text-[14px]">{flagFor(lang)}</span>
+              <span className="ml-1">{lang.toUpperCase()}</span>
+            </button>
           </div>
 
           {/* Language Toggle */}
           <button 
             onClick={() => setLang(lang === 'en' ? 'es' : 'en')}
-            className="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-lg text-[11px] font-bold text-slate-600 hover:border-blue-400 hover:text-blue-600 transition-all shadow-sm"
+            aria-label={lang === 'en' ? 'Switch to Spanish' : 'Cambiar a Inglés'}
+            className="md:hidden flex items-center justify-center bg-white border border-slate-200 px-3 py-1 rounded-full text-[14px] shadow-sm"
+            title={lang === 'en' ? 'Switch to Spanish' : 'Cambiar a Inglés'}
           >
-            <Globe size={14} />
-            {lang === 'en' ? 'CAMBIAR A ESPAÑOL' : 'CHANGE TO ENGLISH'}
+            <span className="text-[16px]">{flagFor(lang)}</span>
           </button>
         </div>
       </header>
@@ -154,15 +171,15 @@ function App() {
       {/* Stats Overview */}
       <div className="max-w-5xl mx-auto mb-8 grid grid-cols-3 gap-4">
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Triage</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.stats.totalTriage}</p>
           <p className="text-2xl font-bold text-slate-900">{stats.triages || 0}</p>
         </div>
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-red-500">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Hot Leads</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.stats.hotLeads}</p>
           <p className="text-2xl font-bold text-slate-900">{stats.hotLeads || 0}</p>
         </div>
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-emerald-500">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Synced to CRM</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.stats.synced}</p>
           <p className="text-2xl font-bold text-slate-900">{stats.syncs || 0}</p>
         </div>
       </div>
