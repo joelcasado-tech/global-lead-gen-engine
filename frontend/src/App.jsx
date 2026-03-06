@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Zap, Globe, MessageSquare, CheckCircle, ShieldCheck, AlertCircle } from 'lucide-react';
 
@@ -34,6 +34,8 @@ function App() {
   const [input, setInput] = useState('');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [editedResponse, setEditedResponse] = useState('');
+  const [stats, setStats] = useState({ triages: 0, syncs: 0, hotLeads: 0 });
 
   const t = translations[lang];
 
@@ -45,7 +47,16 @@ function App() {
         leadMessage: input
       });
       setResult(response.data);
-    } catch (err) {
+      setEditedResponse(response.data.draft_response);
+      // Increment triage count and persist
+      const newStats = { ...stats, triages: (stats.triages || 0) + 1 };
+      // If the triage marks it as Hot, increment hot counter
+      if (response.data && response.data.intent && response.data.intent.toLowerCase() === 'hot') {
+        newStats.hotLeads = (newStats.hotLeads || 0) + 1;
+      }
+      setStats(newStats);
+      try { localStorage.setItem('gle_stats', JSON.stringify(newStats)); } catch { /* ignore */ }
+    } catch {
       alert("Backend connection failed.");
     } finally {
       setLoading(false);
@@ -56,16 +67,23 @@ function App() {
     if (!result) return;
     setLoading(true);
 
-    const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycby5nOKAlbibLqBMnPYnFtdoa22E3_aUJ_RFTPfxdW5mGlLj1XVzHoUIx_dWMIq4W-uz/exec';
-
     try {
-      await axios.post(WEBHOOK_URL, {
+      const resp = await axios.post('http://localhost:5000/api/sync', {
         ...result,
+        draft_response: editedResponse, // Send the human edited version
         original_message: input
-      }, {
-        headers: { 'Content-Type': 'text/plain' }
       });
-      
+      // If the relay returned an error-like response, surface it
+      if (resp && resp.data && resp.data.error) {
+        console.error('Sync relay error', resp.data);
+        alert('Sync failed: ' + (resp.data.error || JSON.stringify(resp.data)));
+        setLoading(false);
+        return;
+      }
+      // Increment sync count and persist
+      const newStats = { ...stats, syncs: (stats.syncs || 0) + 1 };
+      setStats(newStats);
+      try { localStorage.setItem('gle_stats', JSON.stringify(newStats)); } catch { /* ignore */ }
       alert(lang === 'en' ? "Synced to CRM" : "Sincronizado al CRM");
     } catch (err) {
       console.error(err);
@@ -74,6 +92,16 @@ function App() {
       setLoading(false);
     }
   };
+
+  // Load stats from localStorage on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('gle_stats');
+      if (raw) setStats(JSON.parse(raw));
+    } catch {
+      // ignore
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#f8fafc] p-6 md:p-12 font-sans text-slate-900">
@@ -103,10 +131,26 @@ function App() {
             className="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-lg text-[11px] font-bold text-slate-600 hover:border-blue-400 hover:text-blue-600 transition-all shadow-sm"
           >
             <Globe size={14} />
-            {lang === 'en' ? 'SWAP TO SPANISH' : 'CAMBIAR A INGLÉS'}
+            {lang === 'en' ? 'CAMBIAR A ESPAÑOL' : 'CHANGE TO ENGLISH'}
           </button>
         </div>
       </header>
+
+      {/* Stats Overview */}
+      <div className="max-w-5xl mx-auto mb-8 grid grid-cols-3 gap-4">
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Triage</p>
+          <p className="text-2xl font-bold text-slate-900">{stats.triages || 0}</p>
+        </div>
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-red-500">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Hot Leads</p>
+          <p className="text-2xl font-bold text-slate-900">{stats.hotLeads || 0}</p>
+        </div>
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-emerald-500">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Synced to CRM</p>
+          <p className="text-2xl font-bold text-slate-900">{stats.syncs || 0}</p>
+        </div>
+      </div>
 
       <main className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         
@@ -160,11 +204,14 @@ function App() {
 
                 <section className="p-5 bg-blue-50/50 border border-blue-100 rounded-xl">
                   <h3 className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-3">{t.draftLabel}</h3>
-                  <p className="text-slate-700 leading-relaxed whitespace-pre-line text-sm">
-                    {result.draft_response}
-                  </p>
+                  <textarea
+                    className="w-full p-4 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-blue-400 resize-vertical text-slate-700 leading-relaxed text-sm"
+                    value={editedResponse}
+                    onChange={(e) => setEditedResponse(e.target.value)}
+                    rows={8}
+                  />
                 </section>
-                
+
                 <button 
                   onClick={handleSync}
                   disabled={loading}
@@ -175,7 +222,7 @@ function App() {
               </div>
             </div>
           ) : (
-            <div className="h-full min-h-[400px] border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center text-slate-400 space-y-2 bg-slate-50/50">
+            <div className="h-full min-h-100 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center text-slate-400 space-y-2 bg-slate-50/50">
               <MessageSquare size={48} className="opacity-10" />
               <p className="font-medium text-sm tracking-wide uppercase opacity-40">{t.emptyState}</p>
             </div>
